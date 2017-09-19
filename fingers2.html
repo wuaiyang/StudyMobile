@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,user-scalable=no" />
+<title>Document</title>
+<style type="text/css">
+body,
+html {
+	margin: 0;
+	height: 100%;
+	position: relative;
+	overflow: hidden;
+}
+#box{
+	width: 200px;
+	height: 200px;
+	background: red;
+	color: #fff;
+	font-size: 30px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin:-100px 0 0 -100px;
+}	
+
+</style>
+</head>
+<body>
+<div id="box">
+	
+</div>
+<script type="text/javascript" src="m.Tween.js"></script>
+<script type="text/javascript">
+document.addEventListener('touchstart', function(e){
+    e.preventDefault();
+})
+
+window.onload = function(){
+	
+	var box = document.querySelector('#box');
+	//3D加速
+	css(box,'translateZ',0.01);
+
+	var scaleStart = 0;
+	var rotateStart = 0;
+	setGesTure({
+		el:box,
+		start:function(e){
+		   
+           scaleStart = css(this,'scale');
+           rotateStart = css(this,'rotate');
+		},
+		change:function(e){
+           css(this,'scale',e.scale*scaleStart);
+           css(this,'rotate',rotateStart+e.rotation);
+		}
+
+	})
+};
+/*init:{
+	el://元素，
+	start:fn//gestureStart
+	change:fn//gestureChange
+	end:fn//gestureEnd
+}*/
+function getDeg(point1,point2){
+	var x = point1.x - point2.x;
+	var y = point1.y - point2.y;
+	return Math.atan2(y,x)*180/Math.PI;
+}
+function getDis(point1,point2){
+	var x = point1.x - point2.x;
+	var y = point1.y - point2.y;
+	return Math.sqrt(x*x + y*y)
+}
+function setGesTure(init){
+   var el = init.el;
+   var isGesture = false;
+   var startPoint = [];
+   if(!el){
+   	return;
+   }
+   el.addEventListener('touchstart', function(e){
+   
+      if(e.touches.length>=2){
+        isGesture = true;
+       
+        startPoint[0] = {x:e.touches[0].pageX,y:e.touches[0].pageY};
+        startPoint[1] = {x:e.touches[1].pageX,y:e.touches[1].pageY};
+        init.start&&init.start.call(el,e);
+      }
+   });
+   el.addEventListener('touchmove', function(e){
+        if(isGesture ||e.touches.length >=2){
+        	var nowPoint = [];
+        	nowPoint[0] = {x:e.touches[0].pageX,y:e.touches[0].pageY};
+        	nowPoint[1] = {x:e.touches[1].pageX,y:e.touches[1].pageY};
+
+            var startDis = getDis(startPoint[0],startPoint[1]);
+            var nowDis = getDis(nowPoint[0],nowPoint[1]);
+            var startDeg = getDeg(startPoint[0],startPoint[1]);
+            var nowDeg = getDeg(nowPoint[0],nowPoint[1]);
+            e.scale = nowDis/startDis;
+            e.rotation = nowDeg-startDeg;
+
+            init.change&&init.change.call(el,e);
+      }       
+   });
+   el.addEventListener('touchend',function(e){
+      if(isGesture ){
+         if(e.touches.length <2 || e.targetTouches.length <1 ){
+         	isGesture = false;
+         	init.end&&init.end.call(el,e);
+         }
+      }        
+   });
+}
+</script>
+</body>
+</html>

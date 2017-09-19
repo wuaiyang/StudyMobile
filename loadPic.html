@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,user-scalable=no">
+  <title>Document</title>
+<script type="text/javascript">
+  (function(){
+    
+
+    setRam();
+    window.addEventListener('orientation' in window?'deviceorientation':'resize', setRam)
+    function setRam(){
+      var html = document.documentElement;
+      var width = html.clientWidth;
+      html.style.fontSize = width/16 + 'px';
+      document.addEventListener('touchstart', function(e){
+          e.preventDefault();
+      })
+    }
+  })()
+</script>
+<style>
+body,html{
+  margin: 0;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+ul{
+  margin: 0;
+  padding: 0;
+  list-style:none;
+}
+#header{
+  height: 2rem;
+  background: #000;
+  line-height: 2rem;
+  color: #fff;
+  font-size:.8rem;
+  text-align: center;
+  position: relative;
+}
+#box,.imgWrap{
+  position: absolute;
+  top: 2rem;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow: hidden;
+}
+#list{
+  overflow: hidden;
+}
+#list li{
+  width: 7rem;
+  height: 7rem;
+  margin: .5rem;
+  float: left;
+  background: url('pics/loadingImg.gif') no-repeat center center;
+}
+#list img{
+  display: block;
+  width: 100%;
+  opacity: 0;
+  transition: 2s;
+}
+#imgPage{
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background: #ccc;
+  transform: scale(0);
+  -webkit-transform: scale(0);
+}
+#bigImg{
+  position: absolute;
+  left: 3rem;
+  top: 50%;
+  margin-top: -5rem;
+  width: 10rem;
+  height: 10rem;
+}
+#imgNav{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2rem;
+  background: #fff;
+}
+#imgNav a{
+  float: left;
+  width: 4rem;
+  font-size: .6rem;
+  text-decoration: none;
+  color: #666;
+  text-align: center;
+  line-height: 2rem;
+  border: 1px solid #aaa;
+  box-sizing: border-box;
+}
+#backBtn{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2rem;
+  height: 2rem;
+  color: #fff;
+  font-size: 1.6rem;
+  line-height: 2rem;
+  text-align: center;
+  text-decoration: none;
+  font-weight: bold;
+}
+#inner{
+  position: relative;
+}
+#inner footer{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2rem;
+  height: 2rem;
+  line-height: 2rem;
+  text-align: center;
+  font-size: .8rem;
+  opacity: 0;
+}
+
+</style>
+</head>
+<body>
+<div id="header">你好</div>
+<div id="box">
+  <div id="inner">
+    <ul id="list">
+    </ul>
+    <footer>加载更多</footer>
+  </div> 
+</div>
+<section id="imgPage">
+    <div id="header">大图预览<a href="javascript:;" id="backBtn"><</a></div>
+    <div class="imgWrap">
+      <img src="pics/1.jpg" id="bigImg" />
+      <nav id="imgNav">
+        <a href="javascript:;">向左旋转90</a>
+        <a href="javascript:;">向左旋转90</a>
+        <a href="javascript:;">放大</a>
+        <a href="javascript:;">缩小</a>
+      </nav>
+    </div>
+</section>
+<script type="text/javascript" src="m.Tween.js"></script>
+<script type="text/javascript">
+window.onload = function(){
+  var dataImg = [];
+  var length = 12;
+  var start = 0;
+  var isEnd = false;
+  var box = document.querySelector('#box');
+  var inner = document.querySelector('#inner');
+  var list = document.querySelector('#list');
+  var footer = document.querySelector('footer');
+  var imgPage = document.querySelector('#imgPage');
+  var bigImg = document.querySelector('#bigImg');
+  var lis = list.children;
+  for(var i=0; i<32; i++){
+    dataImg.push('pics/' + (i%16+1) + '.jpg')
+  }
+  createLi();
+  setBigImg();
+  setScroll();
+  //请求数据，加载Li
+  function createLi(){
+    if(start>=dataImg.length){
+
+      footer.innerHTML = '没有更多图片';
+      setTimeout(function(){
+        footer.style.opacity = 0;
+        MTween({
+          el:inner,
+          target:{translateY:box.clientHeight-inner.offsetHeight},
+          time:300,
+          type:'easeBoth'
+        })
+      }, 1000);
+      return;
+    }
+    var end = start + length;
+    end = end>dataImg.length?dataImg.length:end;
+    for(var i=start;i<end;i++){
+      var li = document.createElement('li');
+      li.src = dataImg[i];
+      li.isLoad = true;
+      li.addEventListener('touchstart', function(e){
+        this.isMove = false;
+      })
+      li.addEventListener('touchmove', function(e){
+        this.isMove = true;
+      })
+      li.addEventListener('touchend', function(){
+        if(this.isMove){
+          return;
+        }
+        css(bigImg,'scale',100);
+        css(bigImg,'rotate',0);
+        bigImg.src = this.children[0].src;
+        css(imgPage,'scale',100);
+      })
+      list.appendChild(li);
+    }
+    createImg();
+    footer.style.opacity = 0;
+  }
+
+  function createImg(){
+    var bottom = box.getBoundingClientRect().top + box.getBoundingClientRect().height;
+    for(var i=0;i<lis.length;i++){
+      //li相对于可视区的top
+      var top = lis[i].getBoundingClientRect().top;
+      if(top<bottom && lis[i].isLoad){
+        lis[i].isLoad = false;
+        showImg( lis[i]);
+      }
+    }
+  }
+
+  function showImg(li){
+    var img = new Image();
+    img.src = li.src;
+    img.onload = function(){
+      li.appendChild(img);
+      setTimeout(function(){
+        img.style.opacity = 1;
+      }, 30)
+      
+    }
+  }
+
+  function setScroll(){
+  var box = document.querySelector('#box');
+  mScroll({
+      el:box,
+      offScroll:false,
+      start:function(e){
+         var innertop = css(inner,'translateY') - 5;
+         var minTop = box.clientHeight - inner.offsetHeight;
+         if(minTop >= innertop){
+            footer.style.opacity =1;
+            isEnd = true;
+
+         }else{
+            footer.style.opacity =0;
+            isEnd = false;
+         }
+
+      },
+      move:function(e){
+         createImg();
+      },
+      end:function(e){
+         var innertop = css(inner,'translateY') - 5;
+         var minTop = box.clientHeight - inner.offsetHeight;
+         if(isEnd && minTop >= innertop){
+           clearInterval(inner.timer);
+
+           start += length;
+           createLi();
+           isEnd = false;
+           
+         }
+      },
+      over:function(e){
+        
+      },
+  })
+}
+}
+
+
+
+
+function setBigImg(){
+  var imgPage = document.querySelector('#imgPage');
+  var bigImg = document.querySelector('#bigImg');
+  var navs = document.querySelectorAll('#imgNav a');
+  var backBtn = document.querySelector('#backBtn');
+
+  backBtn.addEventListener('touchend', function(){
+    css(imgPage,'scale',0);
+  })
+
+  var scaleStart = 0;
+  var rotateStart = 0;
+  var maxScale = 1.5;
+  var minScale = .5;
+  css(imgPage,'scale',0);
+ 
+  setGesTure({
+    el:bigImg,
+    start:function(e){
+      scaleStart = css(this,'scale')/100;
+      rotateStart = css(this,'rotate');
+    },
+    change:function(e){
+      var scale = e.scale*scaleStart;
+      if(scale>maxScale){
+        scale=maxScale;
+      }else if(scale<minScale){
+        scale=minScale;
+      }
+      css(this,'scale',scale*100);
+      css(this,'rotate',rotateStart+e.rotation);
+    }
+
+  });
+  navs[0].addEventListener('touchend', function(  ){
+    var rotate = css(bigImg,'rotate');
+    rotate =parseInt(rotate/90)*90 - 90 ;
+    MTween({
+      el:bigImg,
+      target:{rotate:rotate},
+      time:300,
+      type:'easeBoth'
+    });
+  });
+  navs[1].addEventListener('touchend', function(  ){
+    var rotate = css(bigImg,'rotate');
+    rotate =parseInt(rotate/90)*90 + 90 ;
+    MTween({
+      el:bigImg,
+      target:{rotate:rotate},
+      time:300,
+      type:'easeBoth'
+    });
+  });
+  navs[2].addEventListener('touchend', function(  ){
+    var scale = css(bigImg,'scale');
+    scale += 10;
+    if(scale>maxScale*100){
+        scale=maxScale*100;
+    }
+    MTween({
+      el:bigImg,
+      target:{scale:scale},
+      time:300,
+      type:'easeBoth'
+    });
+  });
+  navs[3].addEventListener('touchend', function(  ){
+    var scale = css(bigImg,'scale');
+    scale -= 10;
+    if(scale < minScale*100){
+        scale=minScale*100;
+    }
+    MTween({
+      el:bigImg,
+      target:{scale:scale},
+      time:300,
+      type:'easeBoth'
+    });
+  });
+
+}
+
+   /*init:{
+  el://元素，
+  start:fn//gestureStart
+  change:fn//gestureChange
+  end:fn//gestureEnd
+}*/
+function getDeg(point1,point2){
+  var x = point1.x - point2.x;
+  var y = point1.y - point2.y;
+  return Math.atan2(y,x)*180/Math.PI;
+}
+function getDis(point1,point2){
+  var x = point1.x - point2.x;
+  var y = point1.y - point2.y;
+  return Math.sqrt(x*x + y*y)
+}
+function setGesTure(init){
+   var el = init.el;
+   var isGesture = false;
+   var startPoint = [];
+   if(!el){
+    return;
+   }
+   el.addEventListener('touchstart', function(e){
+      if(e.touches.length>=2){
+        isGesture = true;
+       
+        startPoint[0] = {x:e.touches[0].pageX,y:e.touches[0].pageY};
+        startPoint[1] = {x:e.touches[1].pageX,y:e.touches[1].pageY};
+        init.start&&init.start.call(el,e);
+      }
+   });
+   el.addEventListener('touchmove', function(e){
+        if(isGesture ||e.touches.length >=2){
+          var nowPoint = [];
+          nowPoint[0] = {x:e.touches[0].pageX,y:e.touches[0].pageY};
+          nowPoint[1] = {x:e.touches[1].pageX,y:e.touches[1].pageY};
+
+            var startDis = getDis(startPoint[0],startPoint[1]);
+            var nowDis = getDis(nowPoint[0],nowPoint[1]);
+            var startDeg = getDeg(startPoint[0],startPoint[1]);
+            var nowDeg = getDeg(nowPoint[0],nowPoint[1]);
+            e.scale = nowDis/startDis;
+            e.rotation = nowDeg-startDeg;
+
+            init.change&&init.change.call(el,e);
+      }       
+   });
+   el.addEventListener('touchend',function(e){
+      if(isGesture ){
+         if(e.touches.length <2 || e.targetTouches.length <1 ){
+          isGesture = false;
+          init.end&&init.end.call(el,e);
+         }
+      }        
+   });
+}
+
+function mScroll(init){
+     if(!init.el){
+         return;
+     }
+     var wrap = init.el;
+     var inner = init.el.children[0];
+     var scrollBar = document.createElement('div');
+     var startPoint = 0;
+     var startEl = 0;
+     var lastY = 0;
+     var lastDis = 0;
+     var lastTime = 0;
+     var lastTimeDis = 0;
+     var back = document.documentElement.clientWidth/8;
+     var maxTranslate = wrap.clientHeight - inner.offsetHeight;
+     
+     
+     if(!init.offScroll){
+         var scale = wrap.clientHeight/inner.offsetHeight;
+         inner.style.minHeight = '100%';
+         scrollBar.style.cssText = 'width:4px;background:rgba(0,0,0,.5);position:absolute;right:0;top:0;borderadius:3px;opacity:0;transition:3s opacity';
+         wrap.appendChild(scrollBar);
+     }
+     
+     css(inner,'translateZ',0.01);
+     inner.addEventListener('touchstart',function(e){
+         maxTranslate = wrap.clientHeight - inner.offsetHeight;
+         if(!init.offScroll){
+                if(maxTranslate>=0){
+                scrollBar.style.display = 'none';
+             }else{
+                scrollBar.style.display = 'block';
+             }
+             scale = wrap.clientHeight/list.offsetHeight;
+             scrollBar.style.height = wrap.clientHeight * scale + 'px'; 
+             scrollBar.style.opacity = 1;
+         }
+         
+         clearInterval(inner.timer);
+         startPoint = e.changedTouches[0].pageY;
+         startEl = css(inner,'translateY');
+         lastY = startEl;
+         lastTime = new Date().getTime();
+         lastTimeDis = lastDis = 0;
+         init.start&&init.start.call(wrap,e);
+         
+     });
+     inner.addEventListener('touchmove',function(e){
+         var nowPoint = e.changedTouches[0].pageY;
+         var nowTime = new Date().getTime();
+         var dis = nowPoint - startPoint;
+         var translateY = startEl + dis;
+         if(translateY>back){
+           translateY = back;
+         } else if(maxTranslate -back>translateY){
+           translateY = maxTranslate -back;
+         }
+         css(inner,'translateY',translateY); 
+         !init.offScroll || css(scrollBar,'translateY',-translateY*scale); 
+         lastDis = translateY - lastY;
+         lastY = translateY; 
+         lastTimeDis = nowTime - lastTime; 
+         lastTime = nowTime; 
+         init.move&&init.move.call(wrap,e);
+     })
+     inner.addEventListener('touchend',function(e){
+         var type = 'easeOut';
+         var speed = (lastTimeDis<=0)? 0:Math.round(lastDis/lastTimeDis*10);
+         var target =Math.round(speed*20 + css(inner,'translateY')) ;
+         if(target>0){
+             target = 0;
+             type = 'backOut';
+         }else if(target < maxTranslate){
+             target = maxTranslate;
+         }
+        
+         MTween({
+             el:inner,
+             target:{translateY:target},
+             time:Math.round(Math.abs(target-css(inner,'translateY')))*1.8 ,
+             type:type,
+             callBack:function(){
+               if(!init.offScroll){
+                 scrollBar.style.opacity = 0;
+               }
+               init.over&&init.over.call(wrap,e);
+             },
+             callIn:function(){
+               var translateY = css(inner,'translateY');
+               init.offScroll || css(scrollBar,'translateY',-translateY*scale);
+               init.move&&init.move.call(wrap,e);
+             }
+         })
+         init.end&&init.end.call(wrap,e);
+     })
+ }
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,user-scalable=no">
+
+	<title>rem</title>
+  <script type="text/javascript">
+    (function(){
+      var html = document.documentElement;
+      var hWidth = html.getBoundingClientRect().width;
+      html.style.fontSize = hWidth/16 + "px";
+    })();
+  </script>
+  <style type="text/css">
+    body{margin:0;}
+    div{float: left; width:4rem; height: 4rem;border:1px solid black; box-sizing: border-box;}
+    .box1{background: red;}
+    .box2{background: yellow;}
+    .box3{background: blue;}
+    .box4{background: green;}
+  </style>	
+</head>
+<body>
+	<div class="box1"></div>
+	<div class="box2"></div>
+	<div class="box3"></div>
+	<div class="box4"></div>
+</body>
+</html>

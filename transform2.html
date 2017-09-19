@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,user-scalable=no">
+	<meta name="x5-orientation" content="portrait">
+
+	<title>Document</title>
+	<style type="text/css">
+       body{
+       	margin:0;
+       }
+       body,html{
+       	height: 100%;
+       	position: relative;
+       }
+       #load{
+       	height: 100%;
+       	transform-style: preserve-3d;
+
+       }
+       #logo2{
+       	position: absolute;
+       	top: 35%;
+       	left: 20%;
+       	width: 60%;
+        transform-style: preserve-3d;
+       }
+       
+       #logo2 img{
+     	position: absolute;
+       	display: block;
+       	width: 100%;
+       	backface-visibility: hidden;
+       }
+
+       img:nth-child(2){
+       	transform: rotateY(180deg);
+       }
+
+
+      
+	</style>
+
+	<script src="m.Tween.js"></script>
+	<script type="text/javascript">
+	//获取html
+	var html = document.documentElement;
+	//设置html的字体大小 = 可视区的宽度 / 15
+	html.style.fontSize = html.clientWidth / 15 + 'px';
+	//阻止pc和浏览器默认行为。
+	document.addEventListener('touchstart',function(ev){
+		ev.preventDefault();
+	});
+
+
+
+	window.onload= function(){
+		var logo2 = document.querySelector('#logo2');
+		logo2.addEventListener('touchend', fn1);
+		function fn1(){
+		    MTween({
+		    	el: logo2,
+		    	target: {
+		    		rotateY: 720,
+		    		scale:0,
+		    	},
+		    	time: 5000,
+		    	type: "easeOut",
+		    	callBack: fn2
+		    });
+	    }
+
+	    function fn2(){
+		    MTween({
+		    	el: logo2,
+		    	target: {
+		    		rotateY: 0,
+		    		scale:100,
+		    	},
+		    	time: 5000,
+		    	type: "easeOut",
+		    	callBack: fn1
+		    });
+	    }
+	   
+	}
+</script>
+	
+</head>
+<body>
+    <div id="load">
+    	<div id="logo2">
+    		<img id="img1" src="./img/logo2.png">
+    		<img id="img2" src="./img/logo3.png">
+    	</div>
+    	<!--<div id="logo3">
+    		<img src="./img/logo3.png">
+    	</div>-->
+    </div>
+
+</body>
+</html>

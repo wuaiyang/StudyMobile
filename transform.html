@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,user-scalable=no">
+	<meta name="x5-orientation" content="portrait">
+
+	<title>Document</title>
+	<style type="text/css">
+       #box{
+       	 width: 100px;
+       	 height: 100px;
+       	 border: 1px solid #000;
+       	 padding: 100px;
+       }
+       #div{
+       	 height: 100px;
+       	 background: red;
+       }
+	</style>
+
+	<script src="m.Tween.js"></script>
+	<script type="text/javascript">
+	//获取html
+	var html = document.documentElement;
+	//设置html的字体大小 = 可视区的宽度 / 15
+	html.style.fontSize = html.clientWidth / 15 + 'px';
+	//阻止pc和浏览器默认行为。
+	document.addEventListener('touchstart',function(ev){
+		ev.preventDefault();
+	});
+
+
+
+	window.onload= function(){
+		var div = document.querySelector('#div');
+		//div.addEventListener('touchend',fn1);
+		fn1();
+	function fn1(){
+		MTween({
+			el: div,
+			target: {
+				scale: 0,
+				rotate: 720
+			},
+			time: 2000,
+			type: "easeOut",
+			callBack: fn2
+		});
+	}
+	function fn2(){
+		MTween({
+			el: div,
+			target: {
+				scale: 100,
+				rotate: 0,
+			},
+			time: 2000,
+			type: "easeOut",
+			callBack: fn1
+		});
+	}
+          
+	}
+</script>
+	
+</head>
+<body>
+    <div id="box">
+    	<div id="div"></div>
+    </div>
+
+</body>
+</html>

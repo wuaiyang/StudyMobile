@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,user-scalable=no" />
+<title>Document</title>
+<style type="text/css">
+body,
+html {
+	margin: 0;
+	height: 100%;
+	position: relative;
+	overflow: hidden;
+}
+#box{
+	width: 200px;
+	height: 200px;
+	background: red;
+	color: #fff;
+	font-size: 30px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin:-100px 0 0 -100px;
+}	
+
+</style>
+</head>
+<body>
+<div id="box">
+	
+</div>
+<script type="text/javascript" src="m.Tween.js"></script>
+<script type="text/javascript">
+document.addEventListener('touchstart', function(e){
+    e.preventDefault();
+})
+window.onload = function(){
+	var box = document.querySelector('#box');
+	var scaleStart = 0;
+	var rotateStart = 0;
+	
+	box.addEventListener('gesturestart', function(e){
+        scaleStart = css(box,'scale');
+        rotateStart = css(box,'rotate');
+	});
+	
+	box.addEventListener('gesturechange', function(e){
+         css(box,'scale',e.scale*scaleStart);
+         css(box,'rotate',rotateStart+e.rotation);
+	});
+	//box.addEventListener('gestureend', function(e){
+    //      this.style.background = 'red';
+	//});
+
+}
+</script>
+</body>
+</html>
